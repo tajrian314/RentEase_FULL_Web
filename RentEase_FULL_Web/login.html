@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | RentEase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1740&q=80') no-repeat center center/cover;
+      filter: blur(8px) brightness(0.8);
+      z-index: -1;
+    }
+
+    .wrapper {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      width: 380px;
+      padding: 2rem;
+      color: #fff;
+      text-align: center;
+    }
+
+    h2 {
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: #fff;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: .3s;
+    }
+
+    .tabs button.active {
+      border-bottom: 2px solid #fff;
+      color: #fff;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 1rem;
+    }
+
+    input,
+    select {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .extras {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #eee;
+      align-items: center;
+    }
+
+    .extras a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    button.submit {
+      background: #fff;
+      color: #0b61ff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .3s;
+    }
+
+    button.submit:hover {
+      background: #0b61ff;
+      color: #fff;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    p.bottom-text {
+      font-size: 13px;
+      margin-top: 1rem;
+    }
+
+    p.bottom-text a {
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <h2>Welcome to RentEase</h2>
+
+    <div class="tabs">
+      <button id="loginTab" class="active">Login</button>
+      <button id="signupTab">Sign Up</button>
+    </div>
+
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" required>
+      <input type="password" id="loginPass" placeholder="Password" required>
+      <select id="loginRole" required>
+        <option value="" disabled selected>Select Role</option>
+        <option value="owner">Owner</option>
+        <option value="renter">Renter</option>
+        <option value="admin">Admin</option>
+      </select>
+      <div class="extras">
+        <label><input type="checkbox"> Remember me</label>
+        <a href="#">Forgot Password?</a>
+      </div>
+      <button type="submit" class="submit">Login</button>
+      <p class="bottom-text">Don't have an account? <a id="switchToSignup">Register</a></p>
+    </form>
+
+    <form id="signupForm" class="hidden">
+      <input type="text" id="signupName" placeholder="Full Name" required>
+      <input type="email" id="signupEmail" placeholder="Email" required>
+      <input type="password" id="signupPass" placeholder="Password" required>
+      <input type="tel" id="signupPhone" placeholder="Phone Number" required>
+      <select id="signupRole" required>
+        <option value="" disabled selected>Select Role</option>
+        <option value="owner">Owner</option>
+        <option value="renter">Renter</option>
+      </select>
+      <button type="submit" class="submit">Sign Up</button>
+      <p class="bottom-text">Already have an account? <a id="switchToLogin">Login</a></p>
+    </form>
+  </div>
+
+  <script src="supabase-config.js"></script>
+  <script>
+    const loginTab = document.getElementById("loginTab"),
+      signupTab = document.getElementById("signupTab"),
+      loginForm = document.getElementById("loginForm"),
+      signupForm = document.getElementById("signupForm"),
+      switchToSignup = document.getElementById("switchToSignup"),
+      switchToLogin = document.getElementById("switchToLogin");
+
+    loginTab.addEventListener("click", () => showLogin());
+    signupTab.addEventListener("click", () => showSignup());
+    switchToSignup.addEventListener("click", () => showSignup());
+    switchToLogin.addEventListener("click", () => showLogin());
+
+    function showLogin() {
+      loginTab.classList.add("active");
+      signupTab.classList.remove("active");
+      loginForm.classList.remove("hidden");
+      signupForm.classList.add("hidden");
+    }
+
+    function showSignup() {
+      signupTab.classList.add("active");
+      loginTab.classList.remove("active");
+      signupForm.classList.remove("hidden");
+      loginForm.classList.add("hidden");
+    }
+
+    // Antigravity Fix: Robust Client Retrieval
+    // This helper ensures we have a valid client even if supabase-config.js failed or raced.
+    function getSupabase() {
+      if (window.supabaseClient) return window.supabaseClient;
+      // Check if window.supabase is actual client (has .auth) not just the factory function
+      if (window.supabase && window.supabase.auth) return window.supabase;
+
+      console.warn("Supabase client not found in window, initializing fallback...");
+
+      const SupabaseLib = window.supabase || window.Supabase;
+      // These constants are loaded from supabase-config.js if it ran at all. 
+      // If not, we re-declare them here safely as a last resort fallback.
+      const URL = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://rffytsmzijylmesvrvxy.supabase.co';
+      const KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmZnl0c216aWp5bG1lc3Zydnh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4Njk0MzksImV4cCI6MjA4MDQ0NTQzOX0.RNvmeJij6SPG20aCO0TQSJzH33-L4azoEplxTAHjwj4';
+
+      if (SupabaseLib && SupabaseLib.createClient) {
+        window.supabaseClient = SupabaseLib.createClient(URL, KEY);
+        return window.supabaseClient;
+      } else {
+        alert("CRITICAL: Supabase library not loaded. Please restore internet connection and refresh.");
+        throw new Error("Supabase library not loaded.");
+      }
+    }
+
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("signupEmail").value;
+      const pass = document.getElementById("signupPass").value;
+      const name = document.getElementById("signupName").value;
+      const phone = document.getElementById("signupPhone").value;
+      const role = document.getElementById("signupRole").value;
+
+      if (!email || !pass || !name || !role || !phone) {
+        alert("Please fill all fields!");
+        return;
+      }
+
+      try {
+        // Sign up with Supabase Auth
+        // Sign up with Supabase Auth
+        // Antigravity Fix: Use getSupabase() to ensure client exists
+        const sb = getSupabase();
+        const { data: authData, error: authError } = await sb.auth.signUp({
+          email: email,
+          password: pass,
+          options: {
+            data: {
+              name: name,
+              phone: phone,
+              role: role
+            }
+          }
+        });
+
+        if (authError) throw authError;
+
+        if (authData.user) {
+          // First check if profile already exists
+          // First check if profile already exists
+          const { data: existingProfile } = await sb
+            .from('users')
+            .select('id')
+            .eq('id', authData.user.id)
+            .maybeSingle();
+
+          if (!existingProfile) {
+            const { error: profileError } = await sb
+              .from('users')
+              .insert([
+                {
+                  id: authData.user.id,
+                  email: email,
+                  name: name,
+                  phone: phone,
+                  role: role,
+                  created_at: new Date().toISOString()
+                }
+              ]);
+
+            if (profileError) {
+              console.error('Profile creation error:', profileError);
+              // Check if it's a duplicate key error (profile already exists)
+              if (profileError.code === '23505') {
+                console.log('Profile already exists, continuing...');
+              } else {
+                // Retry with upsert in case of race condition
+                const { error: upsertError } = await sb
+                  .from('users')
+                  .upsert([
+                    {
+                      id: authData.user.id,
+                      email: email,
+                      name: name,
+                      phone: phone,
+                      role: role,
+                      updated_at: new Date().toISOString()
+                    }
+                  ], {
+                    onConflict: 'id'
+                  });
+
+                if (upsertError) {
+                  console.error('Profile upsert also failed:', upsertError);
+                  alert('Account created but profile setup failed. You can still login and your profile will be created automatically.');
+                }
+              }
+            } else {
+              console.log('User profile created successfully');
+            }
+          } else {
+            console.log('User profile already exists');
+          }
+        }
+
+        alert("Signup successful! Please check your email to verify your account, then login.");
+        showLogin();
+      } catch (error) {
+        console.error('Signup error:', error);
+        alert(error.message || "Signup failed. Please try again.");
+      }
+    });
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value;
+      const pass = document.getElementById("loginPass").value;
+      const role = document.getElementById("loginRole").value;
+
+      try {
+        // Sign in with Supabase Auth
+        const sb = getSupabase();
+        const { data: authData, error: authError } = await sb.auth.signInWithPassword({
+          email: email,
+          password: pass,
+        });
+
+        if (authError) throw authError;
+
+        // Get user profile to verify role
+        let userProfile = null;
+        let userRole = role; // Default to form role
+
+        const { data: profileData, error: profileError } = await sb
+          .from('users')
+          .select('role, name, email')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+
+        // If profile doesn't exist, create it
+        if (profileError || !profileData) {
+          console.warn('User profile not found, creating one...');
+
+          // Try to create the profile using upsert to handle race conditions
+          const profileToInsert = {
+            id: authData.user.id,
+            email: authData.user.email || email,
+            name: authData.user.user_metadata?.name || email.split('@')[0],
+            role: role,
+            created_at: new Date().toISOString()
+          };
+
+          const { data: newProfile, error: createError } = await sb
+            .from('users')
+            .upsert([profileToInsert], {
+              onConflict: 'id'
+            })
+            .select('role, name, email')
+            .single();
+
+          if (createError) {
+            console.error('Failed to create user profile:', createError);
+
+            // If upsert fails, try regular insert
+            const { data: insertProfile, error: insertError } = await sb
+              .from('users')
+              .insert([profileToInsert])
+              .select('role')
+              .maybeSingle();
+
+            if (insertError) {
+              console.error('Insert also failed:', insertError);
+              userRole = role;
+              alert('Login successful, but profile setup incomplete. Your profile will be created automatically.');
+            } else if (insertProfile) {
+              userRole = insertProfile.role;
+              userProfile = insertProfile;
+            } else {
+              userRole = role;
+            }
+          } else if (newProfile) {
+            userRole = newProfile.role;
+            userProfile = newProfile;
+            console.log('User profile created/updated successfully');
+          } else {
+            userRole = role;
+          }
+        } else {
+          userProfile = profileData;
+          userRole = profileData.role;
+        }
+
+        // Verify role matches what user selected
+        if (userRole !== role) {
+          await sb.auth.signOut();
+          alert("Wrong role selected! Your account is registered as " + userRole + ".");
+          return;
+        }
+
+        // Store session
+        sessionStorage.setItem('user', JSON.stringify({
+          id: authData.user.id,
+          email: authData.user.email || email,
+          role: userRole,
+          name: (userProfile && userProfile.name) ? userProfile.name : (authData.user.user_metadata?.name || email.split('@')[0])
+        }));
+
+        alert("Welcome back!");
+
+        // Check if user was trying to book a property before login
+        const pendingProperty = sessionStorage.getItem('pendingBookingProperty');
+
+        if (pendingProperty) {
+          sessionStorage.removeItem('pendingBookingProperty');
+          window.location.href = "index.html?property=" + pendingProperty;
+          return;
+        }
+
+        if (role === "owner") {
+          window.location.href = "owner-dashboard.html";
+        } else if (role === "admin") {
+          window.location.href = "admin-dashboard.html";
+        } else {
+          window.location.href = "renter-dashboard.html";
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        alert(error.message || "Login failed. Please check your credentials.");
+      }
+    });
+  </script>
+</body>
+
+</html>

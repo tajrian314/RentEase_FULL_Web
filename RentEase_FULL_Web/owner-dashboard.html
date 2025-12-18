@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Dashboard | RentEase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, hsl(219, 30%, 18%), #3a7bd5);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    header a {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    header a:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h3 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .section {
+      width: 90%;
+      max-width: 700px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 1.8rem;
+      color: #333;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      margin-bottom: 2rem;
+    }
+
+    .section h4 {
+      color: #0b61ff;
+      margin-bottom: 1rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input,
+    select,
+    textarea {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      background: #fff;
+      transition: 0.3s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #0b61ff;
+      box-shadow: 0 0 8px rgba(11, 97, 255, 0.4);
+      outline: none;
+    }
+
+    input[type="file"] {
+      cursor: pointer;
+    }
+
+    button {
+      background: #0b61ff;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #084ad1;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(11, 97, 255, 0.3);
+    }
+
+    .property-card {
+      background: white;
+      color: #333;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+      transition: 0.3s;
+    }
+
+    .property-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .property-card img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    footer {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+
+
+    .badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.25);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .booking-item {
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-top: 10px;
+    }
+
+    .booking-item .meta {
+      font-size: 0.9rem;
+      opacity: 0.95;
+      margin: 6px 0;
+    }
+
+    .booking-item .small {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .booking-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .booking-actions button {
+      border: none;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-confirm {
+      background: rgba(46, 204, 113, 0.85);
+      color: #0b1a10;
+    }
+
+    .btn-reject {
+      background: rgba(231, 76, 60, 0.85);
+      color: #1a0b0b;
+    }
+
+    .btn-cancel {
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+    }
+
+
+
+
+    .map-link {
+      display: inline-block;
+      margin: 6px 0 10px 0;
+      color: #fff;
+      opacity: 0.9;
+      text-decoration: none;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+
+    .map-link:hover {
+      opacity: 1;
+    }
+
+
+
+    /* -------------------------------
+   Navbar User (Bell + Name + Dropdown)
+---------------------------------- */
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      position: relative;
+      font-size: 1.05rem;
+      padding: 0.35rem 0.45rem;
+      border-radius: 12px;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .notif-badge {
+      position: absolute;
+      top: -4px;
+      right: -2px;
+      background: #ff4d4f;
+      color: #fff;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      line-height: 1;
+      padding: 2px 6px;
+      min-width: 18px;
+      text-align: center;
+      border: 2px solid rgba(0, 0, 0, 0.18);
+    }
+
+    .user-menu {
+      position: relative;
+    }
+
+    .user-menu-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.30);
+      color: #fff;
+      border-radius: 999px;
+      padding: 0.38rem 0.70rem;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .user-menu-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .user-dropdown {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 10px);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 14px;
+      min-width: 200px;
+      box-shadow: 0 16px 44px rgba(0, 0, 0, 0.26);
+      overflow: hidden;
+      z-index: 999;
+    }
+
+    .user-dropdown a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.8rem 0.95rem;
+      color: #111;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .user-dropdown a:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-link {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .back-link:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .booking-list {
+      margin-top: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .booking-card {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+    }
+
+    .booking-card .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      opacity: 0.95;
+      margin-top: 6px;
+      font-size: 0.92rem;
+    }
+
+    .booking-card .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .small-btn {
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem 0.85rem;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .small-btn.confirm {
+      background: #2ecc71;
+      color: #08210f;
+    }
+
+    .small-btn.reject {
+      background: #ff4d4f;
+      color: #2a0506;
+    }
+
+    .small-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 0.8rem 1rem;
+        flex-wrap: wrap;
+      }
+
+      .header-left {
+        gap: 8px;
+      }
+
+      .back-link {
+        display: none;
+      }
+
+      header h2 {
+        font-size: 1.1rem;
+      }
+
+      .user-menu-btn span {
+        display: none;
+      }
+
+      .user-menu-btn {
+        padding: 0.4rem 0.5rem;
+        gap: 0;
+      }
+
+      .header-right {
+        gap: 8px;
+      }
+
+      .icon-btn {
+        font-size: 0.95rem;
+        padding: 0.3rem 0.4rem;
+      }
+
+      main {
+        padding: 1.5rem 0.8rem;
+      }
+
+      h3 {
+        font-size: 1.4rem;
+      }
+
+      .section {
+        width: 95%;
+        padding: 1.2rem;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-left">
+      <a class="back-link" href="index.html">← Back to Home</a>
+      <h2>🏠 Owner Dashboard</h2>
+    </div>
+
+    <div class="header-right">
+      <button id="notifBell" class="icon-btn" aria-label="Notifications" title="Booking requests">
+        <i class="fa-regular fa-bell"></i>
+        <span id="notifBadge" class="notif-badge" style="display:none;">0</span>
+      </button>
+
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-menu-btn" aria-haspopup="true" aria-expanded="false" title="Account">
+          <i class="fa-regular fa-user"></i>
+          <span id="navUserName">Account</span>
+        </button>
+
+        <div id="userDropdown" class="user-dropdown" role="menu" style="display:none;">
+          <a href="#top" role="menuitem"><i class="fa-solid fa-house"></i> Dashboard</a>
+          <a href="#" id="signOutLink" role="menuitem"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <h3>Welcome Back, Owner!</h3>
+
+    <div class="section" id="bookingRequests">
+      <h4>🔔 Booking Requests</h4>
+      <div id="booking-requests-list" class="booking-list"></div>
+    </div>
+
+    <!-- add property -->
+    <div class="section">
+      <h4>➕ Add New Property</h4>
+      <form id="add-property-form">
+        <input type="text" id="name" placeholder="Property Name" required>
+        <input type="text" id="location" placeholder="Location" required>
+        <input type="number" id="rent" placeholder="Rent Amount (BDT)" required>
+        <select id="type" required>
+          <option value="" disabled selected>Select Property Type</option>
+          <option value="family">Family</option>
+          <option value="bachelor">Bachelor</option>
+          <option value="sublet">Sublet</option>
+          <option value="hostel">Hostel</option>
+          <option value="office">Office</option>
+        </select>
+        <div id="extra-fields"></div>
+        <textarea id="details" rows="3" placeholder="Property Details, size, parking, rules..."></textarea>
+        <label style="color:#0b61ff;font-weight:600;text-align:left;">Upload Images (First one will be the
+          cover):</label>
+        <input type="file" id="image" accept="image/*" multiple required>
+        <small style="color:#666; font-size:0.8rem; margin-top:-5px;">💡 Hold <strong>Ctrl</strong> (Windows) or
+          <strong>Cmd</strong> (Mac) to select multiple images.</small>
+        <button type="submit">Add Property</button>
+      </form>
+    </div>
+
+    <!-- my properties -->
+    <div class="section">
+      <h4>🏡 My Listed Properties</h4>
+      <div id="property-list">
+        <!-- Properties will be loaded dynamically from Supabase -->
+        <div style="text-align: center; padding: 1rem; color: #666;">
+          <p>Loading your properties...</p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- booking requests -->
+    <div class="section">
+      <h4>🔔 Booking Requests <span id="pending-count" class="badge">0</span></h4>
+      <div id="booking-list">
+        <div style="text-align: center; padding: 1rem; color: #666;">
+          <p>Loading booking requests...</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>© 2025 RentEase. All rights reserved.</footer>
+
+  <script src="supabase-config.js"></script>
+  <script src="owner-dashboard.js"></script>
+</body>
+
+</html>

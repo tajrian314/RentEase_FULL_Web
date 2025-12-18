@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | RentEase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a202c, #2d3748);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #63b3ed;
+        }
+
+        header a {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        header a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #63b3ed;
+        }
+
+        .stat-card p {
+            opacity: 0.8;
+        }
+
+        .admin-section {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .admin-section h3 {
+            margin-bottom: 1rem;
+            color: #2d3748;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f1f1f1;
+        }
+
+        .delete-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .delete-btn:hover {
+            background: #c53030;
+        }
+
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-owner {
+            background: #ebf8ff;
+            color: #3182ce;
+        }
+
+        .role-renter {
+            background: #f0fff4;
+            color: #38a169;
+        }
+
+        .role-admin {
+            background: #faf5ff;
+            color: #805ad5;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h2>🛡️ RentEase Admin</h2>
+        <div style="display:flex; gap:15px; align-items:center;">
+            <span id="adminName">Admin</span>
+            <a href="#" id="logoutBtn">Logout</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="count-users">0</h3>
+                <p>Total Users</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="count-properties">0</h3>
+                <p>Total Properties</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="count-bookings">0</h3>
+                <p>Active Bookings</p>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>👥 User Management</h3>
+            <div style="overflow-x: auto;">
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" style="text-align:center;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>🏠 Property Management</h3>
+            <div style="overflow-x: auto;">
+                <table id="properties-table">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Location</th>
+                            <th>Owner</th>
+                            <th>Rent</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" style="text-align:center;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="supabase-config.js"></script>
+    <script src="admin-dashboard.js"></script>
+</body>
+
+</html>

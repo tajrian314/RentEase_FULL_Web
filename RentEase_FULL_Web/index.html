@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RentEase - Renting Space Made Easy</title>
+  <meta name="description"
+    content="RentEase — professional house consultancy. Find family, bachelor, sublet, hostel or office properties near you." />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <header id="site-header" class="site-header">
+    <nav class="navbar" role="navigation" aria-label="Primary">
+
+      <!-- Brand Logo -->
+      <a href="#top" class="logo">
+        RentEase <img src="Image/icons.png" class="icon" alt="RentEase logo">
+      </a>
+
+      <!-- Mobile Menu Button -->
+      <button id="nav-toggle" class="nav-toggle" aria-controls="primary-menu" aria-expanded="false">
+        ☰
+      </button>
+
+      <!-- Left Navigation Menu -->
+      <ul id="primary-menu" class="nav-links" role="menu">
+        <li><a href="#top">Home</a></li>
+        <li><a href="#property" id="nav-properties-link">Properties</a></li>
+        <li><a href="#about-us">About</a></li>
+      </ul>
+
+      <!-- Right Navigation Buttons -->
+      <div class="nav-buttons">
+        <!-- Guest -->
+        <div id="auth-section">
+          <a href="login.html" class="signup-btn">Login / Signup</a>
+        </div>
+
+        <!-- Logged-in user -->
+        <div id="user-section" class="user-section" style="display:none;">
+          <button id="notifBell" class="icon-btn" aria-label="Notifications" title="Notifications">
+            <i class="fa-regular fa-bell"></i>
+            <span id="notifBadge" class="badge" style="display:none;">0</span>
+          </button>
+
+          <div class="user-menu">
+            <button id="userMenuBtn" class="user-menu-btn" aria-haspopup="true" aria-expanded="false" title="Account">
+              <i class="fa-regular fa-user"></i>
+              <span id="navUserName">Account</span>
+            </button>
+
+            <div id="userDropdown" class="user-dropdown" role="menu" style="display:none;">
+              <a href="#" id="dashboardLink" role="menuitem"><i class="fa-solid fa-house"></i> Dashboard</a>
+              <a href="#" id="signOutLink" role="menuitem"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </nav>
+  </header>
+
+  <!-- hero -->
+  <main id="top">
+    <section class="hero-section">
+      <div class="hero-content">
+        <h1>Renting Space<br>Made Easy</h1>
+        <p>One Click to Your Next Space - Where Renting Meets Convenience!</p>
+        <a class="explore-btn" href="#property">Explore Now</a>
+      </div>
+
+      <div class="search-bar">
+        <form id="search-form">
+          <div class="search-input">
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location" placeholder="Search by location" autocomplete="off">
+          </div>
+
+          <div class="search-input">
+            <label for="type">Type</label>
+            <select id="type" name="type">
+              <option value="">All</option>
+              <option value="family">Family</option>
+              <option value="bachelor">Bachelor</option>
+              <option value="sublet">Sublet</option>
+              <option value="hostel">Hostel</option>
+              <option value="office">Office</option>
+            </select>
+          </div>
+
+          <div class="search-input">
+            <label for="budget">Budget (BDT)</label>
+            <select id="budget-range">
+              <option value="">Select budget range</option>
+              <option value="all">All</option>
+              <option value="lt5000">Less than 5,000</option>
+              <option value="5to20">5,000 - 20,000</option>
+              <option value="20to50">20,000 - 50,000</option>
+              <option value="gt50000">Above 50,000</option>
+            </select>
+          </div>
+
+          <button type="submit" class="search-btn">Search Now</button>
+        </form>
+
+      </div>
+    </section>
+
+    <!-- properties -->
+    <section id="property" class="popular-residence">
+      <div class="section-header">
+        <h2>Our Popular Spaces</h2>
+        <div class="explore-controls">
+          <a href="#" class="explore-more" id="explore-more-btn">Explore More →</a>
+          <a href="#" class="explore-more" id="show-less-btn" style="display: none;">Show Less ←</a>
+        </div>
+      </div>
+
+      <div class="property-cards" id="property-cards">
+        <!-- Properties will be loaded dynamically from Supabase -->
+        <div style="text-align: center; padding: 2rem; color: #666;">
+          <p>Loading properties...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- others -->
+
+    <section id="about-us" class="about-section">
+      <div class="about-container">
+        <h2>About Us</h2>
+        <p class="about-tagline">Connecting hearts to homes, one click at a time.</p>
+
+        <div class="about-grid">
+          <div class="about-card">
+            <i class="fa-solid fa-handshake"></i>
+            <h3>Our Mission</h3>
+            <p>To simplify the rental process for everyone. We bridge the gap between property owners and tenants,
+              creating a seamless, transparent, and hassle-free experience.</p>
+          </div>
+
+          <div class="about-card">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h3>Why Choose Us</h3>
+            <p>We prioritize trust and convenience. With verified listings, direct communication, and a user-friendly
+              platform, finding your next space has never been easier.</p>
+          </div>
+
+          <div class="about-card">
+            <i class="fa-solid fa-users"></i>
+            <h3>Our Community</h3>
+            <p>Whether you are a student, a family, or a business owner, RentEase caters to all. Join thousands of
+              satisfied users who have found their perfect match with us.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- footer -->
+  <!-- footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-top">
+        <div class="footer-column">
+          <h4>We're always here to help you...</h4>
+          <p>Reach out to us through any of these support channels</p>
+        </div>
+
+        <div class="footer-column">
+          <h4>Hotline:</h4>
+          <p>+880 123 456 7890</p>
+        </div>
+
+        <div class="footer-column">
+          <h4>Email:</h4>
+          <p>support@rentease.com</p>
+        </div>
+
+        <div class="footer-column">
+          <h4>Connect with us</h4>
+          <div class="footer-socials">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2025 RentEase All rights reserved</p>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- booking modal -->
+  <div id="booking-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Book Your Space</h2>
+      <form id="booking-form">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+        <label for="phone">Phone:</label>
+        <input type="tel" id="phone" required>
+        <label for="message">Message:</label>
+        <textarea id="message" rows="3" placeholder="Any special request?"></textarea>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Property Details Modal with Gallery -->
+  <div id="property-modal" class="modal">
+    <div class="modal-content property-details-content">
+      <span class="close-property-btn"
+        style="position:absolute; right:20px; top:15px; font-size:2rem; cursor:pointer;">&times;</span>
+
+      <div class="gallery-section">
+        <div class="main-image-container" style="margin-bottom:10px;">
+          <img id="detail-main-image" src="" alt="Main View"
+            style="width:100%; height:350px; object-fit:cover; border-radius:8px; cursor: zoom-in;">
+        </div>
+        <div id="detail-thumbnails" class="thumbnails-row"
+          style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px;">
+          <!-- Thumbnails injected by JS -->
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h2 id="detail-title" style="margin-bottom:5px;">Title</h2>
+        <p id="detail-location" style="color:#666; margin-bottom:10px;"><i class="fa-solid fa-location-dot"></i>
+          Location</p>
+        <p id="detail-price" style="font-size:1.2rem; font-weight:700; color:#0b61ff; margin-bottom:15px;">Rent</p>
+
+        <div id="detail-attributes" style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
+          <!-- e.g. 3 Bed, 2 Bath -->
+        </div>
+
+        <p id="detail-description" style="line-height:1.6; margin-bottom:20px;">Description...</p>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button id="detail-book-btn" class="search-btn" style="width:auto; padding:10px 25px;">Book Now</button>
+        </div>
+
+        <div id="detail-reviews-container" style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
+          <h3>Reviews</h3>
+          <div id="detail-reviews-list">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Lightbox Modal -->
+  <div id="lightbox-modal" class="lightbox">
+    <span class="close-lightbox">&times;</span>
+    <img class="lightbox-content" id="lightbox-img">
+  </div>
+
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
